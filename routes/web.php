@@ -17,4 +17,5 @@ $router->get('/', function () use ($router) {
 
 $router->post('/products', 'ProductController@store');
 $router->put('/products/{id}', 'ProductController@update');
+$router->delete('/products/{id}', 'ProductController@delete');
 

@@ -84,7 +84,7 @@ class ProductController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // check if product exists
+        // Product search by ID
         $product = Product::find($id);
 
         if (!$product) {
@@ -107,6 +107,40 @@ class ProductController extends Controller
                 'status' => 'success',
                 'product' => $product
             ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            // If an error occurs we return HTTP 500 (Internal Server Error)
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Server error',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Delete a product by ID.
+     *
+     * @param $id
+     * @return JsonResponse
+     */
+    public function delete($id)
+    {
+        // Product search by ID
+        $product = Product::find($id);
+
+        // If product does not exist, return HTTP status 404 (Not Found)
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Product not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $product->delete();
+
+            // In case of successful deletion, return HTTP status 204 (No Content)
+            return response()->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Exception $e) {
             // If an error occurs we return HTTP 500 (Internal Server Error)
             return response()->json([
