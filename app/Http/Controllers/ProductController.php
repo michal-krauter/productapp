@@ -9,11 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Facade;
-use Illuminate\Support\Facades\Storage;
-
-
 class ProductController extends Controller
 {
     /**
@@ -149,6 +144,49 @@ class ProductController extends Controller
                 'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Get product by ID.
+     *
+     * @param $id
+     * @return JsonResponse
+     */
+    public function show($id)
+    {
+        // Product search by ID
+        $product = Product::find($id);
+
+        // If product does not exist, return HTTP status 404 (Not Found)
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Product not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        // If product exists, return it with HTTP status 200 (OK)
+        return response()->json([
+            'status' => 'success',
+            'product' => $product
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Get all products.
+     *
+     * @return JsonResponse
+     */
+    public function index()
+    {
+        // Load all products
+        $products = Product::all();
+
+        // Return all products with HTTP status 200 (OK)
+        return response()->json([
+            'status' => 'success',
+            'products' => $products
+        ], Response::HTTP_OK);
     }
 
 }
