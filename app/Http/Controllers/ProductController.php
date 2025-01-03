@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Storage;
 class ProductController extends Controller
 {
     /**
+     * Create product
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -58,6 +60,61 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Update existing product.
+     *
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, $id)
+    {
+        // Validation of input data
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'price' => 'nullable|numeric|min:0'
+        ]);
 
+        // If validation fails, we return errors with HTTP status 400 (Bad Request)
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // check if product exists
+        $product = Product::find($id);
+
+        if (!$product) {
+            // If product does not exist, return HTTP status 404 (Not Found)
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Product not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        // Product value updates, if provided
+        $product->name = $request->input(Configuration::PRODUCT_PROPERTY_NAME, $product->name);
+        $product->price = $request->input(Configuration::PRODUCT_PROPERTY_PRICE, $product->price);
+
+        try {
+            $product->save();
+
+            // Creating a successful response with updated product
+            return response()->json([
+                'status' => 'success',
+                'product' => $product
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            // If an error occurs we return HTTP 500 (Internal Server Error)
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Server error',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
